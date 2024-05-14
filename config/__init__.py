@@ -9,13 +9,12 @@ CHECKPOINT_DIR = 'path/to/model/checkpoints/dir'
 TRAIN_DIR = os.path.join(DATA_DIR, "train")
 TEST_DIR = os.path.join(DATA_DIR, "test")
 
-# DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-DEVICE = "cuda" if torch.cuda.is_available() else ("mps" if torch.backends.mps.is_available() else "cpu")
+DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Number of channels expected in the input image and output masks
 IN_CHANNELS, OUT_CHANNELS = 1, 1
 # Can be changed as per requirements
-IMG_HEIGHT, IMG_WIDTH = 64, 64
+IMG_HEIGHT, IMG_WIDTH = 513, 512
 
 NUM_EPOCHS = 30
 BATCH_SIZE = 1
