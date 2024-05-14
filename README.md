@@ -1,4 +1,4 @@
-# PDR-UNet Paper Implementation using Pytorch
+# PDR-UNet Paper Implementation using PyTorch
 
 [![GitHub license](https://img.shields.io/badge/license-Apache-blue.svg)](
 https://github.com/drkostas/COSC525-Project1/blob/master/LICENSE)
