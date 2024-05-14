@@ -2,8 +2,8 @@ import os
 import torch
 
 # Change to local paths of your local data folder
-DATA_DIR = '/Users/ajay/Documents/Internships/IIT_KGP/Data/MURA_Augmented'
-CHECKPOINT_DIR = '/Users/ajay/Documents/Work_in_US/Git_Projects/PDRUNet-PyTorch/models'
+DATA_DIR = 'path/to/data/dir'
+CHECKPOINT_DIR = 'path/to/model/checkpoints/dir'
 
 # Place the data having the structure as described in README.md
 TRAIN_DIR = os.path.join(DATA_DIR, "train")
