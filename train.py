@@ -29,7 +29,7 @@ train_dataloader, test_dataloader = create_dataloaders(
 )
 
 # create model instance
-baseline_0 = PDRUNet(in_channels=IN_CHANNELS, num_filters=40, out_channels=OUT_CHANNELS).to(DEVICE)
+baseline_0 = PDRUNet(in_channels=IN_CHANNELS, num_filters=NUM_FILTERS, out_channels=OUT_CHANNELS).to(DEVICE)
 
 # get_model_summary(baseline_0)
 
