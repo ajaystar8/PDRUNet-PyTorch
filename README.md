@@ -20,6 +20,8 @@ https://github.com/drkostas/COSC525-Project1/blob/master/LICENSE)
 
 ## About <a name="about"></a>
 
+_An unofficial implementation of Pure Dilated Residual U-Net architecture as proposed in [Shen et al.](https://www.aimsciences.org/article/doi/10.3934/ipi.2020057)_
+
 A personal project created with an aim to experiment with different semantic segmentation architectures proposed in relevant research papers and reproducing results using custom datasets.
 
 Implementation of the `Pure Dilated Residual U-Net` (PDR-UNet) architecture as described in [Shen et al.](https://www.aimsciences.org/article/doi/10.3934/ipi.2020057) for the task of semantic segmentation of Humerus Bone using X-Ray images as the input modality. 
