@@ -20,6 +20,8 @@ https://github.com/drkostas/COSC525-Project1/blob/master/LICENSE)
 
 ## About <a name="about"></a>
 
+_Checkout the [blog](https://ajaystar8.github.io/portfolio/portfolio-1/) of this project on my website!_
+
 _An unofficial implementation of Pure Dilated Residual U-Net architecture as proposed in [Shen et al.](https://www.aimsciences.org/article/doi/10.3934/ipi.2020057)_
 
 A personal project created with an aim to experiment with different semantic segmentation architectures proposed in relevant research papers and reproducing results using custom datasets.
