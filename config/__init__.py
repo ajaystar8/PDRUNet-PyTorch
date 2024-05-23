@@ -14,7 +14,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 # Number of channels expected in the input image and output masks
 IN_CHANNELS, OUT_CHANNELS = 1, 1
 # Can be changed as per requirements
-IMG_HEIGHT, IMG_WIDTH = 513, 512
+IMG_HEIGHT, IMG_WIDTH = 512, 512
 
 NUM_EPOCHS = 30
 BATCH_SIZE = 1
