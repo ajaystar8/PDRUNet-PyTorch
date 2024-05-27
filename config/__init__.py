@@ -2,9 +2,10 @@ import os
 import torch
 
 # Change to local paths of your local data folder
-DATA_DIR = '/Users/ajay/Documents/Internships/IIT_KGP/Data/MURA_Pure_TVT'
-MURA_AUGMENTED_TVT = '/Users/ajay/Documents/Internships/IIT_KGP/Data/MURA_Pure_TVT'
-CHECKPOINT_DIR = '/Users/ajay/Documents/Work_in_US/Git_Projects/PDRUNet-PyTorch/models'
+DATA_DIR = 'path/to/data/dir'
+CHECKPOINT_DIR = 'path/to/ckpt/dir'
+# not required if not using data_split.py
+MURA_AUGMENTED_TVT = 'path/to/dir/where/split/is/to/be/placed'
 
 # Place the data having the structure as described in README.md
 TRAIN_DIR = os.path.join(DATA_DIR, "train")
