@@ -18,7 +18,7 @@ from data_setup import create_dataloaders
 from utils.utils import get_model_summary, plot_loss_accuracy_curves
 
 # setup wandb
-wandb.login(key=keys.WANDB_API_Key)
+wandb.login(key=private_keys.WANDB_API_Key)
 
 # Transforms to convert the image in the format expected by the model
 simple_transforms = transforms.Compose([
