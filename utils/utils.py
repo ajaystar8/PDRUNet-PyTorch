@@ -212,14 +212,14 @@ def make_predictions(model: nn.Module,
 def save_model(
         model: nn.Module,
         target_dir: str,
-        model_name: str
+        model_ckpt_name: str
 ):
     """Saves a PyTorch model to a target directory.
 
       Args:
         model: A target PyTorch model to save.
         target_dir: A directory for saving the model to.
-        model_name: A filename for the saved model. Should include
+        model_ckpt_name: A filename for the saved model. Should include
           either ".pth" or ".pt" as the file extension.
 
       Example usage:
@@ -233,34 +233,34 @@ def save_model(
         os.makedirs(target_dir)
 
     # check if model name follows the guidelines for a checkpoint
-    assert model_name.split(".")[-1] == "pt" or model_name.split(".")[-1] == "pth", \
+    assert model_ckpt_name.split(".")[-1] == "pt" or model_ckpt_name.split(".")[-1] == "pth", \
         "model_name must end with .pt or .pth"
 
     # define complete model checkpoint path
-    model_ckpt_path = os.path.join(target_dir, model_name)
+    model_ckpt_path = os.path.join(target_dir, model_ckpt_name)
 
     # save model state dict
     print(f"[INFO] Saving model to: {model_ckpt_path}")
     torch.save(model.state_dict(), model_ckpt_path)
 
 
-def load_model(model_checkpoint_path: str):
+def load_model(model_ckpt_path: str):
     """
     The function takes in the path to a model checkpoint and returns a PyTorch model containing the trained weights.
 
     Args:
-        model_checkpoint_path: A path to the model checkpoint.
+        model_ckpt_path: A path to the model checkpoint.
 
     Returns:
         A trained PyTorch model instance.
     """
 
-    print(f"[INFO] Loading model checkpoint for prediction from: {model_checkpoint_path}")
+    print(f"[INFO] Loading model checkpoint for prediction from: {model_ckpt_path}")
 
     # Create model instance
-    baseline_0 = PDRUNet(in_channels=IN_CHANNELS, out_channels=OUT_CHANNELS)
+    model = PDRUNet(in_channels=IN_CHANNELS, num_filters=NUM_FILTERS, out_channels=OUT_CHANNELS)
 
     # Load model state dict
-    baseline_0.load_state_dict(torch.load(model_checkpoint_path))
+    model.load_state_dict(torch.load(model_ckpt_path))
 
-    return baseline_0
+    return model

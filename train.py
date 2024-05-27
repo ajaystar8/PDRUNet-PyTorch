@@ -6,13 +6,19 @@ import torch.nn as nn
 import torch.optim as optim
 
 import torchvision.transforms.v2 as transforms
-from torchmetrics.classification import BinaryF1Score, BinaryAccuracy, BinaryJaccardIndex
+import wandb
+from metrics import dice_coefficient
+from torchmetrics.classification import BinaryPrecision, BinaryRecall
 
 from config import *
-from engine import train, eval_model
+from config import private_keys
+from engine import train, test_model
 from model_builder import PDRUNet
-from utils.utils import get_model_summary, plot_loss_accuracy_curves
 from data_setup import create_dataloaders
+from utils.utils import get_model_summary, plot_loss_accuracy_curves
+
+# setup wandb
+wandb.login(key=keys.WANDB_API_Key)
 
 # Transforms to convert the image in the format expected by the model
 simple_transforms = transforms.Compose([
@@ -21,55 +27,97 @@ simple_transforms = transforms.Compose([
 ])
 
 # Generate dataloaders
-train_dataloader, test_dataloader = create_dataloaders(
+train_dataloader, val_dataloader, test_dataloader = create_dataloaders(
     train_dir=TRAIN_DIR,
+    val_dir=VAL_DIR,
     test_dir=TEST_DIR,
     transform=simple_transforms,
     batch_size=BATCH_SIZE
 )
 
 # create model instance
-baseline_0 = PDRUNet(in_channels=IN_CHANNELS, num_filters=NUM_FILTERS, out_channels=OUT_CHANNELS).to(DEVICE)
+model = PDRUNet(in_channels=IN_CHANNELS, num_filters=NUM_FILTERS, out_channels=OUT_CHANNELS).to(DEVICE)
 
 # get_model_summary(baseline_0)
 
 # create a loss function instance
-loss_function = nn.BCEWithLogitsLoss()
+loss_fn = nn.BCEWithLogitsLoss()
 
 # create an optimizer instance
-optimizer = optim.Adam(params=baseline_0.parameters(), lr=LEARNING_RATE)
+optimizer = optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
 
-# create accuracy function instance
-accuracy_function = BinaryAccuracy().to(DEVICE)
+# Custom created function to calculate dice score
+dice_fn = dice_coefficient
 
-# create F1 score function instance
-f1_score_function = BinaryF1Score().to(DEVICE)
+# torchmetrics instances to calculate precision and recall
+precision_fn = BinaryPrecision().to(DEVICE)
+recall_fn = BinaryRecall().to(DEVICE)
 
-# create Jaccard score function instance
-jaccard_idx_function = BinaryJaccardIndex().to(DEVICE)
+"""
+[INFO]: Change the following names for easy tracking of experiments
+"""
+RUN_NAME = "FDS-PDR-UNet-Metal"
+MODEL_CKPT_NAME = "pdrunet.pth"
+
+config = {
+    "image_size": (IN_CHANNELS, IMG_HEIGHT, IMG_WIDTH),
+    "dataset": "MURA-Pure",
+    "sample_size": len(train_dataloader) + len(val_dataloader) + len(test_dataloader),
+    "train_val_test_split": "80:10:10",
+    "epochs": NUM_EPOCHS,
+    "batch_size": 1,
+    "model": model.__class__.__name__,
+    "learning_rate": 1e-5,
+    "loss_fn": loss_fn.__class__.__name__,
+    "optimizer": optimizer.__class__.__name__
+}
+
+# initialize a wandb run
+run = wandb.init(
+    project="PDR_UNet",
+    name=RUN_NAME,
+    config=config,
+    notes="Using Metal GPUs",
+    tags=["FDS", "pure", "metal"]
+)
+
+# define metrics
+wandb.define_metric("train_dice", summary="max")
+wandb.define_metric("val_dice", summary="max")
+
+wandb.define_metric("train_precision", summary="max")
+wandb.define_metric("val_precision", summary="max")
+
+wandb.define_metric("train_recall", summary="max")
+wandb.define_metric("val_recall", summary="max")
+
+# copy your config
+experiment_config = wandb.config
+
+# For tracking gradients
+wandb.watch(model, log="gradients", log_freq=1)
+
+# training
+wandb.alert(
+    title="Training started",
+    text=RUN_NAME,
+    level=wandb.AlertLevel.INFO,
+)
 
 # Perform model training
 baseline_0_train_results = train(
-    model=baseline_0,
+    model=model,
     train_dataloader=train_dataloader,
-    test_dataloader=test_dataloader,
-    loss_function=loss_function,
+    val_dataloader=val_dataloader,
+    loss_fn=loss_fn,
     optimizer=optimizer,
-    accuracy_function=accuracy_function,
-    f1_score_function=f1_score_function,
-    jaccard_idx_function=jaccard_idx_function,
-    epochs=NUM_EPOCHS
+    dice_fn=dice_fn, precision_fn=precision_fn, recall_fn=recall_fn, model_ckpt_name=MODEL_CKPT_NAME
 )
 
 # Perform testing on the trained model
-baseline_0_results = eval_model(
-    model=baseline_0,
-    data_loader=test_dataloader,
-    loss_function=loss_function,
-    accuracy_function=accuracy_function,
-    f1_score_function=f1_score_function,
-    jaccard_idx_function=jaccard_idx_function
+baseline_0_results = test_model(
+    model_ckpt_name=MODEL_CKPT_NAME,
+    dataloader=test_dataloader,
+    loss_fn=loss_fn,
+    dice_fn=dice_fn, precision_fn=precision_fn, recall_fn=recall_fn
 )
-
-# Visualize the loss-vs-epoch and accuracy-vs-epoch curves
-plot_loss_accuracy_curves(baseline_0_results)

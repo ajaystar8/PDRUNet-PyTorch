@@ -3,6 +3,7 @@ Contains functionality for creating PyTorch Datasets and DataLoaders for semanti
 """
 
 import os.path
+import random
 from glob import glob
 from typing import *
 from PIL import Image
@@ -44,6 +45,7 @@ class SegmentationDataset(Dataset):
 
 def create_dataloaders(
         train_dir: str,
+        val_dir: str,
         test_dir: str,
         transform: transforms.Compose,
         batch_size: int,
@@ -55,6 +57,7 @@ def create_dataloaders(
 
     Args:
         train_dir: Path to the training directory.
+        val_dir: Path to the validation directory
         test_dir: Path to the test directory.
         transform: torchvision transforms to perform on training and testing data.
         batch_size: Number of samples per batch to in each of the DataLoaders.
@@ -69,15 +72,27 @@ def create_dataloaders(
                 batch_size=1
             )
     """
+    train_image_paths = sorted(glob(os.path.join(train_dir, "images", "*.png")))
+    train_mask_paths = sorted(glob(os.path.join(train_dir, "masks", "*.png")))
+
+    val_image_paths = sorted(glob(os.path.join(val_dir, "images", "*.png")))
+    val_mask_paths = sorted(glob(os.path.join(val_dir, "images", "*.png")))
+
+    test_image_paths = sorted(glob(os.path.join(test_dir, "images", "*.png")))
+    test_mask_paths = sorted(glob(os.path.join(test_dir, "images", "*.png")))
 
     # Create train dataset
-    train_data = SegmentationDataset(image_paths=glob(os.path.join(train_dir, "images", "*.png")),
-                                     mask_paths=glob(os.path.join(train_dir, "masks", "*.png")),
+    train_data = SegmentationDataset(image_paths=train_image_paths,
+                                     mask_paths=train_mask_paths,
                                      transform=transform)
 
+    val_data = SegmentationDataset(image_paths=val_image_paths,
+                                    mask_paths=val_mask_paths,
+                                    transform=transform)
+
     # Create test dataset
-    test_data = SegmentationDataset(image_paths=glob(os.path.join(test_dir, "images", "*.png")),
-                                    mask_paths=glob(os.path.join(test_dir, "masks", "*.png")),
+    test_data = SegmentationDataset(image_paths=test_image_paths,
+                                    mask_paths=test_mask_paths,
                                     transform=transform)
 
     # Create dataloaders for the training and testing datasets
@@ -87,9 +102,15 @@ def create_dataloaders(
                                   batch_size=batch_size,
                                   shuffle=True)
 
+    val_dataloader = DataLoader(dataset=val_data,
+                                batch_size=batch_size,
+                                shuffle=True)
+
     # test dataloader
     test_dataloader = DataLoader(dataset=test_data,
                                  batch_size=batch_size,
                                  shuffle=False)
 
-    return train_dataloader, test_dataloader
+    print(f"[INFO] Number of training images: {len(train_data)}\n[INFO] Number of validation images: {len(val_data)}"
+          f"\n[INFO] Number of testing images: {len(test_data)}\n")
+    return train_dataloader, val_dataloader, test_dataloader

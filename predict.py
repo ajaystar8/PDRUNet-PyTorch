@@ -30,7 +30,7 @@ simple_transforms = transforms.Compose([
 ])
 
 # load trained PyTorch model instance
-baseline_0 = load_model(model_checkpoint_path=model_path)
+baseline_0 = load_model(model_ckpt_path=model_path)
 
 # send model to device for predictions
 baseline_0 = baseline_0.to(DEVICE)
