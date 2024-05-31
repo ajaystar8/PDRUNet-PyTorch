@@ -24,14 +24,17 @@ from data_setup import create_dataloaders
 parser = argparse.ArgumentParser(description='Script to begin training and validation of PDRU-Net.',
                                  epilog='Happy training! :)')
 
-parser.add_argument('data_dir', metavar='data_dir', help='path to dataset directory')
-parser.add_argument('checkpoint_dir', metavar='checkpoint_dir',
+# positional arguments
+parser.add_argument('data_dir', metavar='DATA_DIR', help='path to dataset directory')
+parser.add_argument('checkpoint_dir', metavar='CHECKPOINT_DIR',
                                   help='path to directory storing model checkpoints')
+parser.add_argument('wandb_api_key', metavar='WANDB_API_KEY',
+                    help='API key of your Weights and Biases Account.')
 
-parser.add_argument('-v', '--verbose', type=int, metavar='verbosity', choices=[0, 1], default=0,
+# optional arguments
+parser.add_argument('-v', '--verbose', type=int, metavar='VERBOSITY', choices=[0, 1], default=0,
                     help="setting verbosity to 1 will send email alerts to user after every epoch "
                          "(default: %(default)s)")
-
 hyperparameters_group = parser.add_argument_group("Hyperparameters for model training")
 hyperparameters_group.add_argument('--input_dims', nargs=2, type=int, metavar=("H", "W"),
                                    help="spatial dimensions of input image (default: %(default)s)", default=[256, 256])
@@ -56,8 +59,7 @@ args = parser.parse_args()
 
 # setup wandb
 # comment this line out, if you want to permanently set your API Keys in config/private_keys.py
-WANDB_API_KEY = str(input("Enter your WANDB_API_KEY: "))
-wandb.login(key=WANDB_API_KEY)
+wandb.login(key=args.wandb_api_key)
 
 # Transforms to convert the image in the format expected by the model
 simple_transforms = transforms.Compose([
