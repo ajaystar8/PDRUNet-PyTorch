@@ -1,6 +1,5 @@
 ### Todo 📝
 
-- [ ] Update README.md
 - [ ] Add instructions for installing requirements using `Makefile`.
 - [ ] Add train, val and test results.
 
@@ -14,3 +13,4 @@
 - [x] Time train and validation steps.
 - [x] Enable hyperparameter modification using command line arguments while executing `train.py`.
 - [x] Enabling command line arguments using ArgParse.
+- [x] Update README.md

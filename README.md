@@ -14,6 +14,7 @@ https://github.com/drkostas/COSC525-Project1/blob/master/LICENSE)
   + [Prerequisites](#prereq)
 + [Installing the Requirements](#installing)
 + [Running the Code](#run_locally)
++ [Segmenting Images Selected Randomly from Dataset](#predict)
 + [TODO](#todo)
 + [A Kind Request](#request)
 + [License](#license)
@@ -68,21 +69,24 @@ These instructions will get you a copy of the project up and running on your loc
 ### Project Structure <a name="dir_str"></a>
 The project is structured as follows:
 ```
-PDRUNet-PyTroch/
-├── config/
-│   └── __init__.py
+UNet-PyTorch/
 ├── assets/
+├── config/
+│   ├── __init__.py
+│   └── private_keys.py
 ├── data/
 │   ├── train/
+│   │   ├── images/
+│   │   └── masks/
+│   ├── val/
 │   │   ├── images/
 │   │   └── masks/
 │   └── test/
 │       ├── images/
 │       └── masks/
 ├── models/
-├── utils/
-│   └── utils.py
 ├── requirements.txt
+├── utils.py
 ├── data_setup.py
 ├── model_builder.py
 ├── engine.py
@@ -118,17 +122,76 @@ $ conda create -n name_of_env python=3.8 --file requirements.txt
 
 ## Running the Code <a name="run_locally"></a>
 
-Navigate to the [config](config/__init__.py) package and specify the following: 
-+ Path to your `data` directory.
-+ Path to `models` directory for saving model checkpoints.
-+ Change other `hyperparameters` if necessary.
-
 Activate the conda environment:
 ```ShellSession
 $ conda activate name_of_env
 ```
 
-To start training the model, you can call [train.py](train.py) directly. No command line arguments are necessary as the parameters have already been set in [config.py](config/__init__.py)
+Command invocation help to begin model training. An example command invocation is given below. 
+```console
+> python3 train.py --help
+usage: train.py [-h] [-v VERBOSITY] [--input_dims H W] [--epochs NUM_EPOCHS] [--batch_size N] [--learning_rate LR] [--in_channels IN_C] [--out_channels OUT_C] [--filters F]
+                DATA_DIR CHECKPOINT_DIR WANDB_API_KEY
+
+Script to begin training and validation of PDRU-Net.
+
+positional arguments:
+  DATA_DIR              path to dataset directory
+  CHECKPOINT_DIR        path to directory storing model checkpoints
+  WANDB_API_KEY         API key of your Weights and Biases Account.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v VERBOSITY, --verbose VERBOSITY
+                        setting verbosity to 1 will send email alerts to user after every epoch (default: 0)
+
+Hyperparameters for model training:
+  --input_dims H W      spatial dimensions of input image (default: [256, 256])
+  --epochs NUM_EPOCHS   number of epochs to train (default: 10)
+  --batch_size N        number of images per batch (default: 1)
+  --learning_rate LR    learning rate for training (default: 0.0001)
+
+Architecture parameters:
+  --in_channels IN_C    number of channels in input image (default: 1)
+  --out_channels OUT_C  number of classes in ground truth mask (default: 1)
+  --filters F           number of filters in architecture (refer architecture diagram) (default: 40)
+
+Happy training! :)
+```
+
+Example command invocation to begin training the PDR-UNet architecture. Change the arguments as necessary. 
+```commandline
+python3 train.py --verbose 0 --input_dims 128 128 --epochs 10 --batch_size 1 --learning_rate 1e-4 --in_channels 1 --out_channels 1 --filters 40 path/to/data path/to/models 123abc
+```
+
+## Segmenting Images Selected Randomly from Dataset <a name="predict"></a>
+Once the model training is complete and the .pth file is stored in the models directory, you can execute this script. Similar to [train.py](train.py), command line arguments can be specified to alter the model behaviour accordingly. 
+
+Command invocation help to perform image segmentation. An example command invocation is given below. 
+```console
+> python3 predict.py --help
+usage: predict.py [-h] [--input_dims H W] [--in_channels IN_C] [--out_channels OUT_C] [--filters F] data_dir checkpoint_dir
+
+Script to segment an image using a trained checkpoint of PDRU-Net.
+
+positional arguments:
+  data_dir              path to dataset directory
+  checkpoint_dir        path to directory storing model checkpoints
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --input_dims H W      spatial dimensions of input image (default: [256, 256])
+  --in_channels IN_C    number of channels in input image (default: 1)
+  --out_channels OUT_C  number of classes in ground truth mask (default: 1)
+  --filters F           number of filters in architecture (refer architecture diagram) (default: 40)
+
+Happy segmenting! :)
+```
+
+Example command invocation to begin segmentation using PDR-UNet architecture. Change the arguments as necessary.
+```commandline
+python3 predict.py path/to/data path/to/models --input_dims 128 128 --in_channels 1 --out_channels 1 --filters 40
+```
 
 ## TODO <a name="todo"></a>
 
