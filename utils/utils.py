@@ -8,9 +8,14 @@ from PIL import Image
 import matplotlib.pyplot as plt
 
 from torch import nn
-from torchsummary import summary
 from torch.utils.data import DataLoader
 import torchvision.transforms.v2 as transforms
+
+try:
+    from torchsummary import summary
+except ImportError as e:
+    print("Failed to import torchsummary. Please install it using 'pip install torchsummary'.")
+    raise e
 
 from config import *
 from model_builder import PDRUNet

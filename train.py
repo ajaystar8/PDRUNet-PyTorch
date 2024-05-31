@@ -8,7 +8,11 @@ import torch.optim as optim
 import torchvision.transforms.v2 as transforms
 import wandb
 from metrics import dice_coefficient
-from torchmetrics.classification import BinaryPrecision, BinaryRecall
+
+try:
+    from torchmetrics.classification import BinaryPrecision, BinaryRecall
+except ImportError as e:
+    print("Failed to import torchmetrics. Please install it using `pip install torchmetrics`")
 
 from config import *
 from config import private_keys
