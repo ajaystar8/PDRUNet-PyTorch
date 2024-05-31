@@ -3,7 +3,6 @@ Contains functionality for creating PyTorch Datasets and DataLoaders for semanti
 """
 
 import os.path
-import random
 from glob import glob
 from typing import *
 from PIL import Image
@@ -111,6 +110,4 @@ def create_dataloaders(
                                  batch_size=batch_size,
                                  shuffle=False)
 
-    print(f"[INFO] Number of training images: {len(train_data)}\n[INFO] Number of validation images: {len(val_data)}"
-          f"\n[INFO] Number of testing images: {len(test_data)}\n")
     return train_dataloader, val_dataloader, test_dataloader
