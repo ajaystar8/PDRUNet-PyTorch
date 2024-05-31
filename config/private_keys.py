@@ -1,1 +1,1 @@
-WANDB_API_KEY = "paste_your_API_key_here"
+WANDB_API_KEY = str(input("Enter your WANDB_API_KEY: "))
