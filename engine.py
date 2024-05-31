@@ -1,6 +1,7 @@
 """
 Contains functions for training, validating and testing a PyTorch model.
 """
+import os
 import time
 from config import *
 from tqdm.auto import tqdm
@@ -78,7 +79,7 @@ def train_step(model: nn.Module,
     train_recall /= len(dataloader)
 
     print(f"\nTrain Loss: {train_loss:.5f} | Train DSC: {train_dice:.5f} | Train Precision: {train_precision:.5f} "
-          f"| Train Recall: {train_recall:.5f}\n")
+          f"| Train Recall: {train_recall:.5f}")
     return {"train_loss": train_loss, "train_dice": train_dice, "train_precision": train_precision,
             "train_recall": train_recall}
 
@@ -139,11 +140,12 @@ def val_step(model: nn.Module,
 
 
 def train(model: nn.Module,
+          epochs: int,
           train_dataloader: DataLoader,
           val_dataloader: DataLoader,
           loss_fn: nn.Module,
           optimizer: optim.Optimizer,
-          dice_fn, precision_fn, recall_fn, model_ckpt_name):
+          dice_fn, precision_fn, recall_fn, model_ckpt_name: str, checkpoint_dir: str, verbose: int):
     """
     Trains and validates a PyTorch model.
 
@@ -160,6 +162,7 @@ def train(model: nn.Module,
         dice_fn: A custom function to calculate the dice score.
         precision_fn: A torchmetrics instance to measure precision.
         recall_fn: A torchmetrics instance to measure recall.
+        checkpoint_dir: path to directory where the model checkpoints are stored
 
     Returns:
         A tuple of containing train and validation metrics (in form of dict) in form of:
@@ -180,7 +183,7 @@ def train(model: nn.Module,
     # Track the best obtained Dice Score
     # Loop through training and validation steps for a number of epochs
     max_validation_dice, max_train_time, max_val_time = 0.0000, 0, 0
-    for epoch in tqdm(range(NUM_EPOCHS)):
+    for epoch in tqdm(range(epochs)):
 
         print(f"\nEPOCH-{epoch + 1}------------------------------------------------------\n")
 
@@ -205,7 +208,7 @@ def train(model: nn.Module,
             print(f"\nModel performance improved from Dice Score of {max_validation_dice:.5f} to "
                   f"Dice Score of {val_dice:.5f}\n")
             print("[INFO] Saving model checkpoint...")
-            save_model(model=model, target_dir=CHECKPOINT_DIR, model_ckpt_name=model_ckpt_name)
+            save_model(model=model, target_dir=checkpoint_dir, model_ckpt_name=model_ckpt_name)
             max_validation_dice = val_dice
 
         metrics = ["loss", "dice", "precision", "recall"]
@@ -214,11 +217,13 @@ def train(model: nn.Module,
             val_metrics[f"val_{metric}"].append(val_epoch_metrics[f"val_{metric}"].cpu().detach().numpy())
 
         wandb.log({**train_epoch_metrics, **val_epoch_metrics})
-        wandb.alert(
-            title=f"Epoch-{epoch + 1} completed!",
-            text=f"Val-Dice-Score: {val_epoch_metrics['val_dice']:.3f} \n",
-            level=wandb.AlertLevel.INFO,
-        )
+
+        if verbose == 1:
+            wandb.alert(
+                title=f"Epoch-{epoch + 1} completed!",
+                text=f"Val-Dice-Score: {val_epoch_metrics['val_dice']:.3f} \n",
+                level=wandb.AlertLevel.INFO,
+            )
 
     wandb.log({"train_time": max_train_time, "val_time": max_val_time})
     wandb.finish()
@@ -228,7 +233,8 @@ def train(model: nn.Module,
 def test_model(model_ckpt_name: str,
                dataloader: DataLoader,
                loss_fn: nn.Module,
-               dice_fn, precision_fn, recall_fn):
+               dice_fn, precision_fn, recall_fn, checkpoint_dir: str,
+               in_channels: int, num_filters: int, out_channels: int):
     """
     Stores and returns the performance metrics when the model is tested on the testing dataset. Has similar
     functionality to the val_step function above.
@@ -240,6 +246,10 @@ def test_model(model_ckpt_name: str,
         dice_fn: A custom function to calculate the dice score.
         precision_fn: A torchmetrics instance to measure precision.
         recall_fn: A torchmetrics instance to measure recall.
+        checkpoint_dir: path to directory where the model checkpoints are stored
+        in_channels: number of channels in the input image (default 1)
+        num_filters: number of filters in architecture (refer architecture diagram) (default 40)
+        out_channels: number of classes in ground truth mask (default 1)
 
 
     Returns:
@@ -247,7 +257,7 @@ def test_model(model_ckpt_name: str,
             {"test_loss": test_loss, "test_dice": test_dice, "test_precision": test_precision,
                "test_recall": test_recall}
     """
-    model = load_model(os.path.join(CHECKPOINT_DIR, model_ckpt_name))
+    model = load_model(os.path.join(checkpoint_dir, model_ckpt_name), in_channels, num_filters, out_channels)
     model.to(DEVICE)
 
     test_loss, test_dice, test_precision, test_recall = 0, 0, 0, 0
@@ -271,6 +281,4 @@ def test_model(model_ckpt_name: str,
 
     test_results = {"test_loss": test_loss, "test_dice": test_dice, "test_precision": test_precision,
                     "test_recall": test_recall}
-
-    wandb.log({**test_results})
     return test_results

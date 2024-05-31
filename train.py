@@ -1,7 +1,8 @@
 """
 Trains a PyTorch semantic segmentation model using device-agnostic code.
 """
-
+import os
+import argparse
 import torch.nn as nn
 import torch.optim as optim
 
@@ -14,37 +15,68 @@ try:
 except ImportError as e:
     print("Failed to import torchmetrics. Please install it using `pip install torchmetrics`")
 
-from config import *
-from config import private_keys
+import config
 from engine import train, test_model
 from model_builder import PDRUNet
 from data_setup import create_dataloaders
-from utils.utils import get_model_summary, plot_loss_accuracy_curves
+
+# Take command line arguments
+parser = argparse.ArgumentParser(description='Script to begin training and validation of PDRU-Net.',
+                                 epilog='Happy training! :)')
+
+parser.add_argument('data_dir', metavar='data_dir', help='path to dataset directory')
+parser.add_argument('checkpoint_dir', metavar='checkpoint_dir',
+                                  help='path to directory storing model checkpoints')
+
+parser.add_argument('-v', '--verbose', type=int, metavar='verbosity', choices=[0, 1], default=0,
+                    help="setting verbosity to 1 will send email alerts to user after every epoch "
+                         "(default: %(default)s)")
+
+hyperparameters_group = parser.add_argument_group("Hyperparameters for model training")
+hyperparameters_group.add_argument('--input_dims', nargs=2, type=int, metavar=("H", "W"),
+                                   help="spatial dimensions of input image (default: %(default)s)", default=[256, 256])
+hyperparameters_group.add_argument('--epochs', type=int, metavar='NUM_EPOCHS',
+                                   help='number of epochs to train (default: %(default)s)', default=10)
+hyperparameters_group.add_argument('--batch_size', type=int, metavar='N',
+                                   help='number of images per batch (default: %(default)s)', default=1)
+hyperparameters_group.add_argument('--learning_rate', type=float, metavar='LR',
+                                   help='learning rate for training (default: %(default)s)', default=1e-4)
+
+architecture_params_group = parser.add_argument_group("Architecture parameters")
+architecture_params_group.add_argument('--in_channels', metavar="IN_C", type=int,
+                                       help='number of channels in input image (default: %(default)s)', default=1)
+architecture_params_group.add_argument('--out_channels', metavar="OUT_C", type=int,
+                                       help='number of classes in ground truth mask (default: %(default)s)', default=1)
+architecture_params_group.add_argument('--filters', type=int, metavar='F',
+                                       help='number of filters in architecture (refer architecture diagram) (default: '
+                                            '%(default)s)',
+                                       default=40)
+
+args = parser.parse_args()
 
 # setup wandb
-
 # comment this line out, if you want to permanently set your API Keys in config/private_keys.py
 WANDB_API_KEY = str(input("Enter your WANDB_API_KEY: "))
-
 wandb.login(key=WANDB_API_KEY)
 
 # Transforms to convert the image in the format expected by the model
 simple_transforms = transforms.Compose([
-    transforms.Resize(size=(IMG_HEIGHT, IMG_WIDTH)),
+    transforms.Resize(size=(args.input_dims[0], args.input_dims[1])),
     transforms.ToTensor(),
 ])
 
 # Generate dataloaders
 train_dataloader, val_dataloader, test_dataloader = create_dataloaders(
-    train_dir=TRAIN_DIR,
-    val_dir=VAL_DIR,
-    test_dir=TEST_DIR,
+    train_dir=os.path.join(args.data_dir, 'train'),
+    val_dir=os.path.join(args.data_dir, 'val'),
+    test_dir=os.path.join(args.data_dir, 'test'),
     transform=simple_transforms,
-    batch_size=BATCH_SIZE
+    batch_size=args.batch_size
 )
 
 # create model instance
-model = PDRUNet(in_channels=IN_CHANNELS, num_filters=NUM_FILTERS, out_channels=OUT_CHANNELS).to(DEVICE)
+model = PDRUNet(in_channels=args.in_channels, num_filters=args.filters,
+                out_channels=args.out_channels).to(config.DEVICE)
 
 # get_model_summary(baseline_0)
 
@@ -52,14 +84,14 @@ model = PDRUNet(in_channels=IN_CHANNELS, num_filters=NUM_FILTERS, out_channels=O
 loss_fn = nn.BCEWithLogitsLoss()
 
 # create an optimizer instance
-optimizer = optim.Adam(params=model.parameters(), lr=LEARNING_RATE)
+optimizer = optim.Adam(params=model.parameters(), lr=args.learning_rate)
 
 # Custom created function to calculate dice score
 dice_fn = dice_coefficient
 
 # torchmetrics instances to calculate precision and recall
-precision_fn = BinaryPrecision().to(DEVICE)
-recall_fn = BinaryRecall().to(DEVICE)
+precision_fn = BinaryPrecision().to(config.DEVICE)
+recall_fn = BinaryRecall().to(config.DEVICE)
 
 """
 [INFO]: Change the following names for easy tracking of experiments
@@ -68,11 +100,11 @@ RUN_NAME = "FDS-PDR-UNet-Metal"
 MODEL_CKPT_NAME = "pdrunet.pth"
 
 config = {
-    "image_size": (IN_CHANNELS, IMG_HEIGHT, IMG_WIDTH),
+    "image_size": (args.in_channels, args.input_dims[0], args.input_dims[1]),
     "dataset": "MURA-Pure",
     "sample_size": len(train_dataloader) + len(val_dataloader) + len(test_dataloader),
     "train_val_test_split": "80:10:10",
-    "epochs": NUM_EPOCHS,
+    "epochs": args.epochs,
     "batch_size": 1,
     "model": model.__class__.__name__,
     "learning_rate": 1e-5,
@@ -115,11 +147,13 @@ wandb.alert(
 # Perform model training
 baseline_0_train_results = train(
     model=model,
+    epochs=args.epochs,
     train_dataloader=train_dataloader,
     val_dataloader=val_dataloader,
     loss_fn=loss_fn,
     optimizer=optimizer,
-    dice_fn=dice_fn, precision_fn=precision_fn, recall_fn=recall_fn, model_ckpt_name=MODEL_CKPT_NAME
+    dice_fn=dice_fn, precision_fn=precision_fn, recall_fn=recall_fn,
+    model_ckpt_name=MODEL_CKPT_NAME, checkpoint_dir=args.checkpoint_dir, verbose=args.verbose
 )
 
 # Perform testing on the trained model
@@ -127,5 +161,6 @@ baseline_0_results = test_model(
     model_ckpt_name=MODEL_CKPT_NAME,
     dataloader=test_dataloader,
     loss_fn=loss_fn,
-    dice_fn=dice_fn, precision_fn=precision_fn, recall_fn=recall_fn
+    dice_fn=dice_fn, precision_fn=precision_fn, recall_fn=recall_fn, checkpoint_dir=args.checkpoint_dir,
+    in_channels=args.in_channels, num_filters=args.filters, out_channels=args.out_channels
 )

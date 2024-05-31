@@ -1,6 +1,7 @@
 """
 Contains various utility functions for data visualization, PyTorch model training, testing and saving.
 """
+import os
 import random
 from glob import glob
 from typing import *
@@ -107,17 +108,18 @@ def visualize_image_from_dataloader(dataloader: DataLoader):
     plt.show()
 
 
-def get_model_summary(model: nn.Module):
+def get_model_summary(model: nn.Module, input_size: Tuple[int, int, int]):
     """
     Prints the summary of the PyTorch model created.
 
     Args:
         model: A PyTorch model instance which is to be summarized.
+        input_size: Expected input dimensions of the image in tuple format (C, H, W)
 
     Returns:
         None.
     """
-    return summary(model=model.to(DEVICE), input_size=(IN_CHANNELS, IMG_HEIGHT, IMG_WIDTH))
+    return summary(model=model.to(DEVICE), input_size=input_size)
 
 
 def plot_loss_accuracy_curves(results: Dict[str, List[float]]):
@@ -249,7 +251,7 @@ def save_model(
     torch.save(model.state_dict(), model_ckpt_path)
 
 
-def load_model(model_ckpt_path: str):
+def load_model(model_ckpt_path: str, in_channels: int, num_filters: int, out_channels: int):
     """
     The function takes in the path to a model checkpoint and returns a PyTorch model containing the trained weights.
 
@@ -263,7 +265,7 @@ def load_model(model_ckpt_path: str):
     print(f"[INFO] Loading model checkpoint for prediction from: {model_ckpt_path}")
 
     # Create model instance
-    model = PDRUNet(in_channels=IN_CHANNELS, num_filters=NUM_FILTERS, out_channels=OUT_CHANNELS)
+    model = PDRUNet(in_channels=in_channels, num_filters=num_filters, out_channels=out_channels)
 
     # Load model state dict
     model.load_state_dict(torch.load(model_ckpt_path))
