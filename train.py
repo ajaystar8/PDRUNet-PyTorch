@@ -28,6 +28,9 @@ parser = argparse.ArgumentParser(description='Script to begin training and valid
 parser.add_argument('data_dir', metavar='DATA_DIR', help='path to dataset directory')
 parser.add_argument('checkpoint_dir', metavar='CHECKPOINT_DIR',
                                   help='path to directory storing model checkpoints')
+parser.add_argument('run_name', metavar='RUN_NAME', help='Name of current run')
+parser.add_argument('dataset_name', metavar='DATASET_NAME',
+                    help='Name of dataset over which model is to be trained')
 parser.add_argument('wandb_api_key', metavar='WANDB_API_KEY',
                     help='API key of your Weights and Biases Account.')
 
@@ -103,9 +106,9 @@ MODEL_CKPT_NAME = "pdrunet.pth"
 
 config = {
     "image_size": (args.in_channels, args.input_dims[0], args.input_dims[1]),
-    "dataset": "MURA-Pure",
+    "dataset": args.dataset_name,
     "sample_size": len(train_dataloader) + len(val_dataloader) + len(test_dataloader),
-    "train_val_test_split": "80:10:10",
+    "train_val_test_split": "{}-{}-{}".format(config.SPLIT["train"], config.SPLIT["val"], config.SPLIT["test"]),
     "epochs": args.epochs,
     "batch_size": 1,
     "model": model.__class__.__name__,
@@ -117,10 +120,8 @@ config = {
 # initialize a wandb run
 run = wandb.init(
     project="PDR_UNet",
-    name=RUN_NAME,
+    name=args.run_name,
     config=config,
-    notes="Using Metal GPUs",
-    tags=["FDS", "pure", "metal"]
 )
 
 # define metrics
