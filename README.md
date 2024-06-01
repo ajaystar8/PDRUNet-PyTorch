@@ -163,8 +163,8 @@ Happy training! :)
 ```
 
 Example command invocation to begin training the PDR-UNet architecture. Change the arguments as necessary. 
-```commandline
-python3 train.py --verbose 0 --input_dims 128 128 --epochs 10 --batch_size 1 --learning_rate 1e-4 --in_channels 1 --out_channels 1 --filters 40 path/to/data path/to/models my_run_name my_dataset_name 123abc
+```ShellSession
+$ python3 train.py --verbose 0 --input_dims 128 128 --epochs 10 --batch_size 1 --learning_rate 1e-4 --in_channels 1 --out_channels 1 --filters 40 path/to/data path/to/models my_run_name my_dataset_name 123abc
 ```
 
 ## Segmenting Images Selected Randomly from Dataset <a name="predict"></a>
@@ -192,7 +192,7 @@ Happy segmenting! :)
 ```
 
 Example command invocation to begin segmentation using PDR-UNet architecture. Change the arguments as necessary.
-```commandline
+```ShellSession
 $ python3 predict.py path/to/data path/to/models --input_dims 128 128 --in_channels 1 --out_channels 1 --filters 40
 ```
 
