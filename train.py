@@ -98,10 +98,6 @@ dice_fn = dice_coefficient
 precision_fn = BinaryPrecision().to(config.DEVICE)
 recall_fn = BinaryRecall().to(config.DEVICE)
 
-"""
-[INFO]: Change the following names for easy tracking of experiments
-"""
-RUN_NAME = "FDS-PDR-UNet-Metal"
 MODEL_CKPT_NAME = "pdrunet.pth"
 
 config = {
@@ -143,7 +139,7 @@ wandb.watch(model, log="gradients", log_freq=1)
 # training
 wandb.alert(
     title="Training started",
-    text=RUN_NAME,
+    text=args.run_name,
     level=wandb.AlertLevel.INFO,
 )
 
