@@ -129,15 +129,18 @@ $ conda activate name_of_env
 
 Command invocation help to begin model training. An example command invocation is given below. 
 ```console
-> python3 train.py --help
-usage: train.py [-h] [-v VERBOSITY] [--input_dims H W] [--epochs NUM_EPOCHS] [--batch_size N] [--learning_rate LR] [--in_channels IN_C] [--out_channels OUT_C] [--filters F]
-                DATA_DIR CHECKPOINT_DIR WANDB_API_KEY
+$ python3 train.py --help
+>>> usage: train.py [-h] [-v VERBOSITY] [--input_dims H W] [--epochs NUM_EPOCHS] [--batch_size N] [--learning_rate LR] [--in_channels IN_C]
+                [--out_channels OUT_C] [--filters F]
+                DATA_DIR CHECKPOINT_DIR RUN_NAME DATASET_NAME WANDB_API_KEY
 
 Script to begin training and validation of PDRU-Net.
 
 positional arguments:
   DATA_DIR              path to dataset directory
   CHECKPOINT_DIR        path to directory storing model checkpoints
+  RUN_NAME              Name of current run
+  DATASET_NAME          Name of dataset over which model is to be trained
   WANDB_API_KEY         API key of your Weights and Biases Account.
 
 optional arguments:
@@ -161,7 +164,7 @@ Happy training! :)
 
 Example command invocation to begin training the PDR-UNet architecture. Change the arguments as necessary. 
 ```commandline
-python3 train.py --verbose 0 --input_dims 128 128 --epochs 10 --batch_size 1 --learning_rate 1e-4 --in_channels 1 --out_channels 1 --filters 40 path/to/data path/to/models 123abc
+python3 train.py --verbose 0 --input_dims 128 128 --epochs 10 --batch_size 1 --learning_rate 1e-4 --in_channels 1 --out_channels 1 --filters 40 path/to/data path/to/models my_run_name my_dataset_name 123abc
 ```
 
 ## Segmenting Images Selected Randomly from Dataset <a name="predict"></a>
@@ -169,8 +172,8 @@ Once the model training is complete and the .pth file is stored in the models di
 
 Command invocation help to perform image segmentation. An example command invocation is given below. 
 ```console
-> python3 predict.py --help
-usage: predict.py [-h] [--input_dims H W] [--in_channels IN_C] [--out_channels OUT_C] [--filters F] data_dir checkpoint_dir
+$ python3 predict.py --help
+>>> usage: predict.py [-h] [--input_dims H W] [--in_channels IN_C] [--out_channels OUT_C] [--filters F] data_dir checkpoint_dir
 
 Script to segment an image using a trained checkpoint of PDRU-Net.
 
@@ -190,7 +193,7 @@ Happy segmenting! :)
 
 Example command invocation to begin segmentation using PDR-UNet architecture. Change the arguments as necessary.
 ```commandline
-python3 predict.py path/to/data path/to/models --input_dims 128 128 --in_channels 1 --out_channels 1 --filters 40
+$ python3 predict.py path/to/data path/to/models --input_dims 128 128 --in_channels 1 --out_channels 1 --filters 40
 ```
 
 ## TODO <a name="todo"></a>
