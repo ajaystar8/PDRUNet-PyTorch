@@ -75,10 +75,10 @@ def create_dataloaders(
     train_mask_paths = sorted(glob(os.path.join(train_dir, "masks", "*.png")))
 
     val_image_paths = sorted(glob(os.path.join(val_dir, "images", "*.png")))
-    val_mask_paths = sorted(glob(os.path.join(val_dir, "images", "*.png")))
+    val_mask_paths = sorted(glob(os.path.join(val_dir, "masks", "*.png")))
 
     test_image_paths = sorted(glob(os.path.join(test_dir, "images", "*.png")))
-    test_mask_paths = sorted(glob(os.path.join(test_dir, "images", "*.png")))
+    test_mask_paths = sorted(glob(os.path.join(test_dir, "masks", "*.png")))
 
     # Create train dataset
     train_data = SegmentationDataset(image_paths=train_image_paths,
