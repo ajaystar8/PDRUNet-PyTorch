@@ -1,6 +1,7 @@
 """
 This script is used to create a train-val-test split of the dataset
 """
+import os
 import shutil
 import argparse
 from glob import glob
