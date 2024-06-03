@@ -106,9 +106,10 @@ config = {
     "sample_size": len(train_dataloader) + len(val_dataloader) + len(test_dataloader),
     "train_val_test_split": "{}-{}-{}".format(config.SPLIT["train"], config.SPLIT["val"], config.SPLIT["test"]),
     "epochs": args.epochs,
-    "batch_size": 1,
+    "batch_size": args.batch_size,
     "model": model.__class__.__name__,
-    "learning_rate": 1e-5,
+    "filters": args.filters,
+    "learning_rate": args.learning_rate,
     "loss_fn": loss_fn.__class__.__name__,
     "optimizer": optimizer.__class__.__name__
 }
