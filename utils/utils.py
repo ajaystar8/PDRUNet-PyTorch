@@ -265,9 +265,9 @@ def load_model(model_ckpt_path: str, in_channels: int, num_filters: int, out_cha
     print(f"[INFO] Loading model checkpoint for prediction from: {model_ckpt_path}")
 
     # Create model instance
-    model = PDRUNet(in_channels=in_channels, num_filters=num_filters, out_channels=out_channels)
+    model = PDRUNet(in_channels=in_channels, num_filters=num_filters, out_channels=out_channels).to(DEVICE)
 
     # Load model state dict
-    model.load_state_dict(torch.load(model_ckpt_path))
+    model.load_state_dict(torch.load(model_ckpt_path, map_location=DEVICE))
 
     return model
