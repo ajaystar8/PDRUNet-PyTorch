@@ -1,5 +1,8 @@
 # PDR-UNet Paper Implementation using PyTorch
 
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](
+https://github.com/ajaystar8/PDRUNet-PyTorch/blob/main/LICENSE)
+
 ## Table of Contents
 
 + [About](#about)
