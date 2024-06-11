@@ -35,6 +35,10 @@ parser.add_argument('--out_channels', metavar="OUT_C", type=int,
                                        help='number of classes in ground truth mask (default: %(default)s)', default=1)
 parser.add_argument('--batch_size', type=int, metavar='N',
                                    help='number of images per batch (default: %(default)s)', default=1)
+parser.add_argument('--filters', type=int, metavar='NUM_FILTERS',
+                                       help='number of filters in architecture (refer architecture diagram) (default: '
+                                            '%(default)s)',
+                                       default=40)
 
 
 args = parser.parse_args()
@@ -67,7 +71,7 @@ model_test_results = test_model(
     dataloader=test_dataloader,
     loss_fn=loss_fn,
     dice_fn=dice_fn, precision_fn=precision_fn, recall_fn=recall_fn, checkpoint_dir=args.checkpoint_dir,
-    in_channels=args.in_channels, out_channels=args.out_channels
+    in_channels=args.in_channels, num_filters=args.filters, out_channels=args.out_channels
 )
 
 # path where the test results will be stored

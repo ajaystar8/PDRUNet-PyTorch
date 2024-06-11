@@ -53,7 +53,7 @@ architecture_params_group.add_argument('--in_channels', metavar="IN_C", type=int
                                        help='number of channels in input image (default: %(default)s)', default=1)
 architecture_params_group.add_argument('--out_channels', metavar="OUT_C", type=int,
                                        help='number of classes in ground truth mask (default: %(default)s)', default=1)
-architecture_params_group.add_argument('--filters', type=int, metavar='F',
+architecture_params_group.add_argument('--filters', type=int, metavar='NUM_FILTERS',
                                        help='number of filters in architecture (refer architecture diagram) (default: '
                                             '%(default)s)',
                                        default=40)
