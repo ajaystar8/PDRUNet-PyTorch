@@ -59,6 +59,9 @@ architecture_params_group.add_argument('--in_channels', metavar="IN_C", type=int
                                        help='number of channels in input image (default: %(default)s)', default=1)
 architecture_params_group.add_argument('--out_channels', metavar="OUT_C", type=int,
                                        help='number of classes in ground truth mask (default: %(default)s)', default=1)
+architecture_params_group.add_argument('--filters', metavar="FILTERS", type=int,
+                                       help='number of filters desired in the architecture (default: %(default)s)',
+                                       default=40, required=False)
 
 args = parser.parse_args()
 
@@ -169,5 +172,5 @@ baseline_0_results = test_model(
     dataloader=test_dataloader,
     loss_fn=loss_fn,
     dice_fn=dice_fn, precision_fn=precision_fn, recall_fn=recall_fn, checkpoint_dir=args.checkpoint_dir,
-    in_channels=args.in_channels, out_channels=args.out_channels
+    in_channels=args.in_channels, num_filters=args.filters, out_channels=args.out_channels
 )
